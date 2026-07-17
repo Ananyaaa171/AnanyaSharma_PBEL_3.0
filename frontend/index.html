@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Credit Card Fraud Detection System</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<div class="container py-4">
+
+    <!-- Hero Section -->
+
+    <div class="hero text-center mb-4">
+
+        <h1>
+
+            <i class="bi bi-shield-check"></i>
+
+            AI Credit Card Fraud Detection System
+
+        </h1>
+
+        <p class="text-light mb-0">
+
+            Detect fraudulent credit card transactions using a trained Random Forest Machine Learning model.
+
+        </p>
+
+    </div>
+
+    <!-- Upload Card -->
+
+    <div class="card shadow-lg p-4 mb-4">
+
+        <h4>
+
+            <i class="bi bi-upload"></i>
+
+            Upload Transaction Dataset
+
+        </h4>
+
+        <p class="text-muted">
+
+            Supported Format: CSV |
+            Required Columns: Time, V1–V28, Amount
+
+        </p>
+
+        <form id="uploadForm">
+
+            <div class="row g-3">
+
+                <div class="col-md-9">
+
+                    <input
+                        class="form-control form-control-lg"
+                        type="file"
+                        name="file"
+                        accept=".csv"
+                        required>
+
+                </div>
+
+                <div class="col-md-3 d-grid">
+
+                    <button
+                        class="btn btn-primary btn-lg"
+                        type="submit">
+
+                        <i class="bi bi-search"></i>
+
+                        Run Prediction
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- Statistics -->
+
+    <div class="row g-4">
+
+        <div class="col-md-3">
+
+            <div class="card stat-card total shadow">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-database-fill fs-1"></i>
+
+                    <h5>Total Transactions</h5>
+
+                    <h2 id="total">0</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card stat-card success shadow">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-check-circle-fill fs-1"></i>
+
+                    <h5>Legitimate</h5>
+
+                    <h2 id="legitimate">0</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card stat-card danger shadow">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+
+                    <h5>Fraud Detected</h5>
+
+                    <h2 id="fraud">0</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card stat-card warning shadow">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-cpu-fill fs-1"></i>
+
+                    <h5>Model Used</h5>
+
+                    <h5 class="mt-2">Random Forest</h5>
+
+                    <small>Accuracy: 99.96%</small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Model Information -->
+
+    <div class="card shadow-lg mt-4">
+
+        <div class="card-body">
+
+            <h4 class="mb-3">
+
+                <i class="bi bi-cpu"></i>
+
+                Model Information
+
+            </h4>
+
+            <table class="table table-bordered">
+
+                <tr>
+
+                    <th width="35%">Algorithm</th>
+
+                    <td>Random Forest Classifier</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Dataset</th>
+
+                    <td>European Credit Card Fraud Dataset</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Features</th>
+
+                    <td>30 Input Features</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Problem Type</th>
+
+                    <td>Binary Classification</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Framework</th>
+
+                    <td>Scikit-Learn</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Fraud Percentage</th>
+
+                    <td id="fraud_percent">0%</td>
+
+                </tr>
+
+            </table>
+
+        </div>
+
+    </div>
+        <!-- Charts -->
+
+    <div class="row mt-5">
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="card shadow-lg p-3">
+
+                <h4 class="text-center">
+                    Fraud vs Legitimate Distribution
+                </h4>
+
+                <canvas id="pieChart"></canvas>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="card shadow-lg p-3">
+
+                <h4 class="text-center">
+                    Transaction Classification Overview
+                </h4>
+
+                <canvas id="barChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Prediction Report -->
+
+    <div class="card shadow-lg mt-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h3 class="m-0">
+
+                <i class="bi bi-table"></i>
+
+                Prediction Report
+
+            </h3>
+
+            <a
+                id="downloadBtn"
+                href="#"
+                class="btn btn-success">
+
+                <i class="bi bi-download"></i>
+
+                Download Prediction Report
+
+            </a>
+
+        </div>
+
+        <div class="card-body">
+
+            <input
+
+                id="searchInput"
+
+                class="form-control mb-3"
+
+                placeholder="Search transaction..."
+
+                onkeyup="filterTable()">
+
+            <div
+                class="table-responsive"
+                id="resultsTable">
+
+                <div class="text-center text-muted py-5">
+
+                    Upload a CSV file to generate predictions.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<footer class="text-center text-light mt-5 mb-3">
+
+Developed using
+<strong>Python</strong> •
+<strong>Flask</strong> •
+<strong>Scikit-Learn</strong> •
+<strong>Pandas</strong> •
+<strong>Bootstrap</strong> •
+<strong>Chart.js</strong>
+
+</footer>
+
+<script src="script.js"></script>
+
+<script>
+
+document.getElementById("downloadBtn").addEventListener("click", function(e){
+
+    e.preventDefault();
+
+    window.open(API_URL + "/download", "_blank");
+
+});
+
+</script>
+
+</body>
+
+</html>
