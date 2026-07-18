@@ -162,13 +162,17 @@ uploadForm.addEventListener("submit", async function (e) {
 
     }
 
-    catch (error) {
+  catch (error) {
 
-        console.error("Prediction Error:", error);
+    console.error("FULL ERROR:", error);
 
-        alert(error.message || "Prediction failed.");
+    alert(
+        "Prediction failed.\n\n" +
+        "Message: " + error.message + "\n\n" +
+        "Stack:\n" + error.stack
+    );
 
-    }
+}
 
     finally {
 
