@@ -198,4 +198,4 @@ The application displays:
 
 ## 📄 License
 
-This project is developed for educational and academic purposes.
+
