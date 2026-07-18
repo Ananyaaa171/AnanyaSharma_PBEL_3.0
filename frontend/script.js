@@ -1,9 +1,11 @@
 const API_URL = "https://creditcardfrauddetector-fwbr.onrender.com";
 
+let pieChart = null;
+let barChart = null;
+
 const uploadForm = document.getElementById("uploadForm");
 
 uploadForm.addEventListener("submit", async function (e) {
-
     e.preventDefault();
 
     const fileInput = document.querySelector('input[type="file"]');
@@ -31,7 +33,13 @@ uploadForm.addEventListener("submit", async function (e) {
             body: formData
         });
 
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
+        }
+
         const data = await response.json();
+
+        console.log("API Response:", data);
 
         // Summary Cards
         document.getElementById("total").innerText = data.total;
@@ -40,65 +48,81 @@ uploadForm.addEventListener("submit", async function (e) {
         document.getElementById("fraud_percent").innerText =
             data.fraud_percent + "%";
 
-        // Table
+        // Prediction Table
         document.getElementById("resultsTable").innerHTML = data.table;
 
-        // Pie Chart
-        if (window.pieChart) window.pieChart.destroy();
+        // Destroy previous charts safely
+        if (pieChart && typeof pieChart.destroy === "function") {
+            pieChart.destroy();
+        }
 
-        window.pieChart = new Chart(document.getElementById("pieChart"), {
-            type: "pie",
-            data: {
-                labels: ["Fraud", "Legitimate"],
-                datasets: [{
-                    data: [data.fraud, data.legitimate],
-                    backgroundColor: ["#dc3545", "#198754"]
-                }]
+        if (barChart && typeof barChart.destroy === "function") {
+            barChart.destroy();
+        }
+
+        // Pie Chart
+        pieChart = new Chart(
+            document.getElementById("pieChart"),
+            {
+                type: "pie",
+                data: {
+                    labels: ["Fraud", "Legitimate"],
+                    datasets: [{
+                        data: [data.fraud, data.legitimate],
+                        backgroundColor: [
+                            "#dc3545",
+                            "#198754"
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
             }
-        });
+        );
 
         // Bar Chart
-        if (window.barChart) window.barChart.destroy();
-
-        window.barChart = new Chart(document.getElementById("barChart"), {
-            type: "bar",
-            data: {
-                labels: ["Fraud", "Legitimate"],
-                datasets: [{
-                    label: "Transactions",
-                    data: [data.fraud, data.legitimate],
-                    backgroundColor: ["#dc3545", "#198754"]
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        barChart = new Chart(
+            document.getElementById("barChart"),
+            {
+                type: "bar",
+                data: {
+                    labels: ["Fraud", "Legitimate"],
+                    datasets: [{
+                        label: "Transactions",
+                        data: [data.fraud, data.legitimate],
+                        backgroundColor: [
+                            "#dc3545",
+                            "#198754"
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
             }
-        });
+        );
 
-    }
-    catch (error) {
+    } catch (error) {
 
-        console.error(error);
-
+        console.error("Prediction Error:", error);
         alert("Prediction failed.");
 
-    }
-
-    finally {
+    } finally {
 
         button.disabled = false;
         button.innerHTML = `
             <i class="bi bi-search"></i>
             Run Prediction
         `;
-
     }
-
 });
 
 // Search Table
