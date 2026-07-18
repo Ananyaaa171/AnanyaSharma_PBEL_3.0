@@ -3,113 +3,76 @@
 
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AI Credit Card Fraud Detection System</title>
+    <title>AI Credit Card Fraud Detection System</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-<div class="container py-4">
+<div class="container py-5">
 
-    <!-- Hero Section -->
+    <!-- Hero -->
 
-    <div class="hero text-center mb-4">
+    <div class="hero text-center">
 
-        <h1>
+        <h1 class="display-4 fw-bold mb-3">
 
             <i class="bi bi-shield-check"></i>
 
-            AI Credit Card Fraud Detection System
+            AI-Powered Credit Card Fraud Detection
 
         </h1>
 
-        <p class="text-light mb-0">
+        <p class="lead mb-4">
 
-            Detect fraudulent credit card transactions using a trained Random Forest Machine Learning model.
-
-        </p>
-
-    </div>
-
-    <!-- Upload Card -->
-
-    <div class="card shadow-lg p-4 mb-4">
-
-        <h4>
-
-            <i class="bi bi-upload"></i>
-
-            Upload Transaction Dataset
-
-        </h4>
-
-        <p class="text-muted">
-
-            Supported Format: CSV |
-            Required Columns: Time, V1–V28, Amount
+            Detect fraudulent credit card transactions using a trained
+            <strong>Random Forest Machine Learning Model</strong>.
+            Upload a CSV file and receive instant fraud predictions,
+            visual analytics, and downloadable reports.
 
         </p>
 
-        <form id="uploadForm">
+        <button
+            class="btn btn-primary btn-lg px-5"
+            id="startBtn">
 
-            <div class="row g-3">
+            <i class="bi bi-play-circle-fill"></i>
 
-                <div class="col-md-9">
+            Start Fraud Detection
 
-                    <input
-                        class="form-control form-control-lg"
-                        type="file"
-                        name="file"
-                        accept=".csv"
-                        required>
-
-                </div>
-
-                <div class="col-md-3 d-grid">
-
-                    <button
-                        class="btn btn-primary btn-lg"
-                        type="submit">
-
-                        <i class="bi bi-search"></i>
-
-                        Run Prediction
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </form>
+        </button>
 
     </div>
 
-    <!-- Statistics -->
+    <!-- Features -->
 
-    <div class="row g-4">
+    <div class="row mt-5 g-4">
 
         <div class="col-md-3">
 
-            <div class="card stat-card total shadow">
+            <div class="card shadow h-100">
 
                 <div class="card-body text-center">
 
-                    <i class="bi bi-database-fill fs-1"></i>
+                    <i class="bi bi-cpu-fill display-5 text-primary"></i>
 
-                    <h5>Total Transactions</h5>
+                    <h4 class="mt-3">Random Forest</h4>
 
-                    <h2 id="total">0</h2>
+                    <p>
+
+                        High-performance machine learning model trained
+                        to detect fraudulent transactions.
+
+                    </p>
 
                 </div>
 
@@ -119,15 +82,20 @@
 
         <div class="col-md-3">
 
-            <div class="card stat-card success shadow">
+            <div class="card shadow h-100">
 
                 <div class="card-body text-center">
 
-                    <i class="bi bi-check-circle-fill fs-1"></i>
+                    <i class="bi bi-bar-chart-fill display-5 text-success"></i>
 
-                    <h5>Legitimate</h5>
+                    <h4 class="mt-3">Interactive Charts</h4>
 
-                    <h2 id="legitimate">0</h2>
+                    <p>
+
+                        Visualize fraud distribution through dynamic
+                        pie charts and bar graphs.
+
+                    </p>
 
                 </div>
 
@@ -137,15 +105,20 @@
 
         <div class="col-md-3">
 
-            <div class="card stat-card danger shadow">
+            <div class="card shadow h-100">
 
                 <div class="card-body text-center">
 
-                    <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                    <i class="bi bi-file-earmark-arrow-down-fill display-5 text-danger"></i>
 
-                    <h5>Fraud Detected</h5>
+                    <h4 class="mt-3">Download Report</h4>
 
-                    <h2 id="fraud">0</h2>
+                    <p>
+
+                        Export prediction results as a CSV report
+                        for further analysis.
+
+                    </p>
 
                 </div>
 
@@ -155,17 +128,20 @@
 
         <div class="col-md-3">
 
-            <div class="card stat-card warning shadow">
+            <div class="card shadow h-100">
 
                 <div class="card-body text-center">
 
-                    <i class="bi bi-cpu-fill fs-1"></i>
+                    <i class="bi bi-lightning-charge-fill display-5 text-warning"></i>
 
-                    <h5>Model Used</h5>
+                    <h4 class="mt-3">Real-Time Detection</h4>
 
-                    <h5 class="mt-2">Random Forest</h5>
+                    <p>
 
-                    <small>Accuracy: 99.96%</small>
+                        Detect fraudulent transactions in seconds
+                        with automated preprocessing.
+
+                    </p>
 
                 </div>
 
@@ -175,19 +151,97 @@
 
     </div>
 
-    <!-- Model Information -->
+    <!-- Workflow -->
 
-    <div class="card shadow-lg mt-4">
+    <div class="card shadow-lg mt-5">
 
         <div class="card-body">
 
-            <h4 class="mb-3">
+            <h2 class="text-center mb-4">
 
-                <i class="bi bi-cpu"></i>
+                How It Works
+
+            </h2>
+
+            <div class="row text-center">
+
+                <div class="col-md-3">
+
+                    <i class="bi bi-upload display-4 text-primary"></i>
+
+                    <h5 class="mt-3">1. Upload CSV</h5>
+
+                    <p>
+
+                        Upload a transaction dataset
+                        containing Time, Amount and PCA features.
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <i class="bi bi-gear-fill display-4 text-success"></i>
+
+                    <h5 class="mt-3">2. Preprocessing</h5>
+
+                    <p>
+
+                        The data is cleaned and scaled before
+                        being passed to the ML model.
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <i class="bi bi-cpu display-4 text-danger"></i>
+
+                    <h5 class="mt-3">3. Prediction</h5>
+
+                    <p>
+
+                        Random Forest classifies every
+                        transaction as Fraud or Legitimate.
+
+                    </p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <i class="bi bi-pie-chart-fill display-4 text-warning"></i>
+
+                    <h5 class="mt-3">4. Results</h5>
+
+                    <p>
+
+                        View statistics, interactive charts,
+                        searchable tables and download reports.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Model -->
+
+    <div class="card shadow-lg mt-5">
+
+        <div class="card-body">
+
+            <h2 class="mb-4 text-center">
 
                 Model Information
 
-            </h4>
+            </h2>
 
             <table class="table table-bordered">
 
@@ -209,22 +263,6 @@
 
                 <tr>
 
-                    <th>Features</th>
-
-                    <td>30 Input Features</td>
-
-                </tr>
-
-                <tr>
-
-                    <th>Problem Type</th>
-
-                    <td>Binary Classification</td>
-
-                </tr>
-
-                <tr>
-
                     <th>Framework</th>
 
                     <td>Scikit-Learn</td>
@@ -233,9 +271,25 @@
 
                 <tr>
 
-                    <th>Fraud Percentage</th>
+                    <th>Input Features</th>
 
-                    <td id="fraud_percent">0%</td>
+                    <td>30 Features</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Accuracy</th>
+
+                    <td>99.96%</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Output</th>
+
+                    <td>Fraud / Legitimate Classification</td>
 
                 </tr>
 
@@ -244,88 +298,41 @@
         </div>
 
     </div>
-        <!-- Charts -->
 
-    <div class="row mt-5">
+</div>
 
-        <div class="col-lg-6 mb-4">
+<!-- Loading Modal -->
 
-            <div class="card shadow-lg p-3">
+<div
+    class="modal fade"
+    id="loadingModal"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    tabindex="-1">
 
-                <h4 class="text-center">
-                    Fraud vs Legitimate Distribution
-                </h4>
+    <div class="modal-dialog modal-dialog-centered">
 
-                <canvas id="pieChart"></canvas>
+        <div class="modal-content">
 
-            </div>
+            <div class="modal-body text-center p-5">
 
-        </div>
-
-        <div class="col-lg-6 mb-4">
-
-            <div class="card shadow-lg p-3">
-
-                <h4 class="text-center">
-                    Transaction Classification Overview
-                </h4>
-
-                <canvas id="barChart"></canvas>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- Prediction Report -->
-
-    <div class="card shadow-lg mt-4">
-
-        <div class="card-header d-flex justify-content-between align-items-center">
-
-            <h3 class="m-0">
-
-                <i class="bi bi-table"></i>
-
-                Prediction Report
-
-            </h3>
-
-            <a
-                id="downloadBtn"
-                href="#"
-                class="btn btn-success">
-
-                <i class="bi bi-download"></i>
-
-                Download Prediction Report
-
-            </a>
-
-        </div>
-
-        <div class="card-body">
-
-            <input
-
-                id="searchInput"
-
-                class="form-control mb-3"
-
-                placeholder="Search transaction..."
-
-                onkeyup="filterTable()">
-
-            <div
-                class="table-responsive"
-                id="resultsTable">
-
-                <div class="text-center text-muted py-5">
-
-                    Upload a CSV file to generate predictions.
+                <div
+                    class="spinner-border text-primary mb-4"
+                    style="width:4rem;height:4rem">
 
                 </div>
+
+                <h3>
+
+                    Initializing AI Engine...
+
+                </h3>
+
+                <p id="loadingText">
+
+                    Connecting to backend...
+
+                </p>
 
             </div>
 
@@ -335,31 +342,21 @@
 
 </div>
 
-<footer class="text-center text-light mt-5 mb-3">
+<footer class="text-center text-light py-4 mt-5">
 
-Developed using
-<strong>Python</strong> •
-<strong>Flask</strong> •
-<strong>Scikit-Learn</strong> •
-<strong>Pandas</strong> •
-<strong>Bootstrap</strong> •
-<strong>Chart.js</strong>
+    Developed using
+    <strong>Python</strong> •
+    <strong>Flask</strong> •
+    <strong>Scikit-Learn</strong> •
+    <strong>Pandas</strong> •
+    <strong>Bootstrap</strong> •
+    <strong>Chart.js</strong>
 
 </footer>
 
-<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-
-document.getElementById("downloadBtn").addEventListener("click", function(e){
-
-    e.preventDefault();
-
-    window.open(API_URL + "/download", "_blank");
-
-});
-
-</script>
+<script src="landing.js"></script>
 
 </body>
 

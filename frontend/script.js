@@ -6,6 +6,7 @@ let barChart = null;
 const uploadForm = document.getElementById("uploadForm");
 
 uploadForm.addEventListener("submit", async function (e) {
+
     e.preventDefault();
 
     const fileInput = document.querySelector('input[type="file"]');
@@ -18,9 +19,10 @@ uploadForm.addEventListener("submit", async function (e) {
     const button = uploadForm.querySelector("button");
 
     button.disabled = true;
+
     button.innerHTML = `
         <span class="spinner-border spinner-border-sm"></span>
-        Predicting...
+        Running Prediction...
     `;
 
     const formData = new FormData();
@@ -28,39 +30,70 @@ uploadForm.addEventListener("submit", async function (e) {
 
     try {
 
-        const response = await fetch(`${API_URL}/predict`, {
-            method: "POST",
-            body: formData
-        });
+        let response;
 
-        if (!response.ok) {
-            throw new Error(`Server returned ${response.status}`);
+        // Try twice in case Render has just finished waking up
+        for (let attempt = 1; attempt <= 2; attempt++) {
+
+            try {
+
+                response = await fetch(`${API_URL}/predict`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) break;
+
+            } catch (err) {
+
+                if (attempt === 2) throw err;
+
+            }
+
+            // Wait 3 seconds before retrying
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+
+        if (!response || !response.ok) {
+            throw new Error("Prediction failed.");
         }
 
         const data = await response.json();
 
-        console.log("API Response:", data);
+        console.log(data);
 
+        // -------------------------------
         // Summary Cards
+        // -------------------------------
+
         document.getElementById("total").innerText = data.total;
         document.getElementById("legitimate").innerText = data.legitimate;
         document.getElementById("fraud").innerText = data.fraud;
         document.getElementById("fraud_percent").innerText =
             data.fraud_percent + "%";
 
-        // Prediction Table
+        // -------------------------------
+        // Results Table
+        // -------------------------------
+
         document.getElementById("resultsTable").innerHTML = data.table;
 
-        // Destroy previous charts safely
-        if (pieChart && typeof pieChart.destroy === "function") {
+        // -------------------------------
+        // Destroy Previous Charts
+        // -------------------------------
+
+        if (pieChart) {
             pieChart.destroy();
         }
 
-        if (barChart && typeof barChart.destroy === "function") {
+        if (barChart) {
             barChart.destroy();
         }
 
+        // -------------------------------
         // Pie Chart
+        // -------------------------------
+
         pieChart = new Chart(
             document.getElementById("pieChart"),
             {
@@ -68,7 +101,10 @@ uploadForm.addEventListener("submit", async function (e) {
                 data: {
                     labels: ["Fraud", "Legitimate"],
                     datasets: [{
-                        data: [data.fraud, data.legitimate],
+                        data: [
+                            data.fraud,
+                            data.legitimate
+                        ],
                         backgroundColor: [
                             "#dc3545",
                             "#198754"
@@ -82,16 +118,25 @@ uploadForm.addEventListener("submit", async function (e) {
             }
         );
 
+        // -------------------------------
         // Bar Chart
+        // -------------------------------
+
         barChart = new Chart(
             document.getElementById("barChart"),
             {
                 type: "bar",
                 data: {
-                    labels: ["Fraud", "Legitimate"],
+                    labels: [
+                        "Fraud",
+                        "Legitimate"
+                    ],
                     datasets: [{
                         label: "Transactions",
-                        data: [data.fraud, data.legitimate],
+                        data: [
+                            data.fraud,
+                            data.legitimate
+                        ],
                         backgroundColor: [
                             "#dc3545",
                             "#198754"
@@ -110,22 +155,34 @@ uploadForm.addEventListener("submit", async function (e) {
             }
         );
 
-    } catch (error) {
+    }
 
-        console.error("Prediction Error:", error);
-        alert("Prediction failed.");
+    catch (error) {
 
-    } finally {
+        console.error(error);
+
+        alert(
+            "The AI server is still starting. Please wait a few seconds and try again."
+        );
+
+    }
+
+    finally {
 
         button.disabled = false;
+
         button.innerHTML = `
             <i class="bi bi-search"></i>
             Run Prediction
         `;
+
     }
+
 });
 
+// --------------------------------------
 // Search Table
+// --------------------------------------
 
 function filterTable() {
 
@@ -134,7 +191,7 @@ function filterTable() {
         .value
         .toLowerCase();
 
-    const table = document.querySelector("table");
+    const table = document.querySelector("#resultsTable table");
 
     if (!table) return;
 
@@ -144,8 +201,10 @@ function filterTable() {
 
         const text = rows[i].innerText.toLowerCase();
 
-        rows[i].style.display = text.includes(input)
-            ? ""
-            : "none";
+        rows[i].style.display =
+            text.includes(input)
+                ? ""
+                : "none";
     }
+
 }
