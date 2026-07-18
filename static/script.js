@@ -42,131 +42,129 @@ uploadForm.addEventListener("submit", async function (e) {
             throw new Error(data.error || "Prediction failed.");
         }
 
+        // ============================
         // Update Summary Cards
-        document.getElementById("total").innerText = data.total;
-        document.getElementById("legitimate").innerText = data.legitimate;
-        document.getElementById("fraud").innerText = data.fraud;
-        document.getElementById("fraud_percent").innerText =
-            data.fraud_percent + "%";
+        // ============================
 
+        document.getElementById("total").innerText = data.total ?? 0;
+        document.getElementById("legitimate").innerText = data.legitimate ?? 0;
+        document.getElementById("fraud").innerText = data.fraud ?? 0;
+        document.getElementById("fraud_percent").innerText =
+            (data.fraud_percent ?? 0) + "%";
+
+        // ============================
         // Update Prediction Table
-        document.getElementById("resultsTable").innerHTML = data.table;
+        // ============================
+
+        document.getElementById("resultsTable").innerHTML = data.table || "";
+
+        // ============================
+        // Destroy Existing Charts
+        // ============================
+
+        if (pieChart instanceof Chart) {
+            pieChart.destroy();
+        }
+
+        if (barChart instanceof Chart) {
+            barChart.destroy();
+        }
+
+        // ============================
+        // Recreate Canvas
+        // ============================
+
+        document.getElementById("pieChart").remove();
+
+        const newPieCanvas = document.createElement("canvas");
+        newPieCanvas.id = "pieChart";
+
+        document
+            .querySelector("h4.text-center")
+            .parentElement
+            .appendChild(newPieCanvas);
+
+        document.getElementById("barChart").remove();
+
+        const newBarCanvas = document.createElement("canvas");
+        newBarCanvas.id = "barChart";
+
+        document
+            .querySelectorAll("h4.text-center")[1]
+            .parentElement
+            .appendChild(newBarCanvas);
 
         // ============================
         // Pie Chart
         // ============================
 
-        if (pieChart) {
-            pieChart.destroy();
-        }
-
-        const pieCtx = document
-            .getElementById("pieChart")
-            .getContext("2d");
-
-        pieChart = new Chart(pieCtx, {
-
-            type: "pie",
-
-            data: {
-
-                labels: ["Fraud", "Legitimate"],
-
-                datasets: [{
-
-                    data: [
-                        Number(data.fraud),
-                        Number(data.legitimate)
-                    ],
-
-                    backgroundColor: [
-                        "#dc3545",
-                        "#198754"
-                    ],
-
-                    borderWidth: 1
-
-                }]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: true
-
+        pieChart = new Chart(
+            document.getElementById("pieChart").getContext("2d"),
+            {
+                type: "pie",
+                data: {
+                    labels: ["Fraud", "Legitimate"],
+                    datasets: [{
+                        data: [
+                            Number(data.fraud),
+                            Number(data.legitimate)
+                        ],
+                        backgroundColor: [
+                            "#dc3545",
+                            "#198754"
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
             }
-
-        });
+        );
 
         // ============================
         // Bar Chart
         // ============================
 
-        if (barChart) {
-            barChart.destroy();
-        }
-
-        const barCtx = document
-            .getElementById("barChart")
-            .getContext("2d");
-
-        barChart = new Chart(barCtx, {
-
-            type: "bar",
-
-            data: {
-
-                labels: ["Fraud", "Legitimate"],
-
-                datasets: [{
-
-                    label: "Transactions",
-
-                    data: [
-                        Number(data.fraud),
-                        Number(data.legitimate)
-                    ],
-
-                    backgroundColor: [
-                        "#dc3545",
-                        "#198754"
-                    ]
-
-                }]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: true,
-
-                scales: {
-
-                    y: {
-
-                        beginAtZero: true,
-
-                        ticks: {
-                            precision: 0
+        barChart = new Chart(
+            document.getElementById("barChart").getContext("2d"),
+            {
+                type: "bar",
+                data: {
+                    labels: ["Fraud", "Legitimate"],
+                    datasets: [{
+                        label: "Transactions",
+                        data: [
+                            Number(data.fraud),
+                            Number(data.legitimate)
+                        ],
+                        backgroundColor: [
+                            "#dc3545",
+                            "#198754"
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
                         }
-
                     }
-
                 }
-
             }
-
-        });
+        );
 
     }
 
     catch (error) {
 
-        console.error(error);
+        console.error("Prediction Error:", error);
 
         alert(error.message || "Prediction failed.");
 
@@ -209,7 +207,5 @@ function filterTable() {
         rows[i].style.display = text.includes(input)
             ? ""
             : "none";
-
     }
-
 }
