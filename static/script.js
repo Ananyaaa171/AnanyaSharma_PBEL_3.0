@@ -2,6 +2,9 @@ const API_URL = "https://creditcardfrauddetector-fwbr.onrender.com";
 
 const uploadForm = document.getElementById("uploadForm");
 
+let pieChart = null;
+let barChart = null;
+
 uploadForm.addEventListener("submit", async function (e) {
 
     e.preventDefault();
@@ -33,65 +36,146 @@ uploadForm.addEventListener("submit", async function (e) {
 
         const data = await response.json();
 
-        // Summary Cards
+        console.log("API Response:", data);
+
+        if (!response.ok) {
+            throw new Error(data.error || "Prediction failed.");
+        }
+
+        // Update Summary Cards
         document.getElementById("total").innerText = data.total;
         document.getElementById("legitimate").innerText = data.legitimate;
         document.getElementById("fraud").innerText = data.fraud;
         document.getElementById("fraud_percent").innerText =
             data.fraud_percent + "%";
 
-        // Table
+        // Update Prediction Table
         document.getElementById("resultsTable").innerHTML = data.table;
 
+        // ============================
         // Pie Chart
-        if (window.pieChart) window.pieChart.destroy();
+        // ============================
 
-        window.pieChart = new Chart(document.getElementById("pieChart"), {
+        if (pieChart) {
+            pieChart.destroy();
+        }
+
+        const pieCtx = document
+            .getElementById("pieChart")
+            .getContext("2d");
+
+        pieChart = new Chart(pieCtx, {
+
             type: "pie",
+
             data: {
+
                 labels: ["Fraud", "Legitimate"],
+
                 datasets: [{
-                    data: [data.fraud, data.legitimate],
-                    backgroundColor: ["#dc3545", "#198754"]
+
+                    data: [
+                        Number(data.fraud),
+                        Number(data.legitimate)
+                    ],
+
+                    backgroundColor: [
+                        "#dc3545",
+                        "#198754"
+                    ],
+
+                    borderWidth: 1
+
                 }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: true
+
             }
+
         });
 
+        // ============================
         // Bar Chart
-        if (window.barChart) window.barChart.destroy();
+        // ============================
 
-        window.barChart = new Chart(document.getElementById("barChart"), {
+        if (barChart) {
+            barChart.destroy();
+        }
+
+        const barCtx = document
+            .getElementById("barChart")
+            .getContext("2d");
+
+        barChart = new Chart(barCtx, {
+
             type: "bar",
+
             data: {
+
                 labels: ["Fraud", "Legitimate"],
+
                 datasets: [{
+
                     label: "Transactions",
-                    data: [data.fraud, data.legitimate],
-                    backgroundColor: ["#dc3545", "#198754"]
+
+                    data: [
+                        Number(data.fraud),
+                        Number(data.legitimate)
+                    ],
+
+                    backgroundColor: [
+                        "#dc3545",
+                        "#198754"
+                    ]
+
                 }]
+
             },
+
             options: {
+
                 responsive: true,
+
+                maintainAspectRatio: true,
+
                 scales: {
+
                     y: {
-                        beginAtZero: true
+
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
+                        }
+
                     }
+
                 }
+
             }
+
         });
 
     }
+
     catch (error) {
 
         console.error(error);
 
-        alert("Prediction failed.");
+        alert(error.message || "Prediction failed.");
 
     }
 
     finally {
 
         button.disabled = false;
+
         button.innerHTML = `
             <i class="bi bi-search"></i>
             Run Prediction
@@ -101,7 +185,9 @@ uploadForm.addEventListener("submit", async function (e) {
 
 });
 
+// ======================================
 // Search Table
+// ======================================
 
 function filterTable() {
 
@@ -110,7 +196,7 @@ function filterTable() {
         .value
         .toLowerCase();
 
-    const table = document.querySelector("table");
+    const table = document.querySelector("#resultsTable table");
 
     if (!table) return;
 
@@ -123,5 +209,7 @@ function filterTable() {
         rows[i].style.display = text.includes(input)
             ? ""
             : "none";
+
     }
+
 }
