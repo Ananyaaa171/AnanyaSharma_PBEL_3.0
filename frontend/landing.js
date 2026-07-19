@@ -1,82 +1,69 @@
+// ==============================
+// AI Credit Card Fraud Detection
+// Landing Page Script
+// ==============================
+
+// Replace with your Render backend URL
 const API_URL = "https://creditcardfrauddetector-fwbr.onrender.com";
 
 const startBtn = document.getElementById("startBtn");
-const loadingModal = new bootstrap.Modal(
-    document.getElementById("loadingModal")
-);
+const configSection = document.getElementById("configSection");
+const configForm = document.getElementById("configForm");
 
-const loadingText = document.getElementById("loadingText");
+// -------------------------------
+// Wake Backend
+// -------------------------------
 
-startBtn.addEventListener("click", startDetection);
+async function wakeBackend() {
+    try {
+        await fetch(API_URL, {
+            method: "GET",
+            mode: "cors"
+        });
 
-async function startDetection() {
-
-    startBtn.disabled = true;
-
-    loadingModal.show();
-
-    loadingText.innerHTML = "Connecting to AI Engine...";
-
-    const maxAttempts = 20;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-
-        loadingText.innerHTML =
-            `Initializing AI Engine...<br>
-             Attempt ${attempt} of ${maxAttempts}`;
-
-        try {
-
-            const controller = new AbortController();
-
-            const timeout = setTimeout(() => {
-                controller.abort();
-            }, 5000);
-
-            const response = await fetch(API_URL, {
-                method: "GET",
-                signal: controller.signal
-            });
-
-            clearTimeout(timeout);
-
-            if (response.ok) {
-
-                loadingText.innerHTML =
-                    "✅ AI Engine Ready!";
-
-                setTimeout(() => {
-
-                    window.location.href = "predict.html";
-
-                }, 1000);
-
-                return;
-            }
-
-        } catch (error) {
-
-            // Backend is probably still waking up.
-            // Ignore and retry.
-
-        }
-
-        await sleep(3000);
-
+        console.log("Backend wake request sent.");
+    } catch (error) {
+        console.log("Backend is still waking up...");
     }
-
-    loadingModal.hide();
-
-    alert(
-        "The AI server is taking longer than expected to start. Please try again in a few moments."
-    );
-
-    startBtn.disabled = false;
-
 }
 
-function sleep(ms) {
+// -------------------------------
+// Start Button
+// -------------------------------
 
-    return new Promise(resolve => setTimeout(resolve, ms));
+startBtn.addEventListener("click", () => {
 
-}
+    configSection.style.display = "block";
+
+    configSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+    wakeBackend();
+
+});
+
+// -------------------------------
+// Continue Button
+// -------------------------------
+
+configForm.addEventListener("submit", function (e) {
+
+    e.preventDefault();
+
+    // Optional loading effect
+    const btn = document.getElementById("continueBtn");
+
+    btn.disabled = true;
+    btn.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Preparing Analysis...
+    `;
+
+    // Small delay for smoother transition
+    setTimeout(() => {
+        window.location.href = "predict.html";
+    }, 1000);
+
+});

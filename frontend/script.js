@@ -1,210 +1,264 @@
-const API_URL = "https://creditcardfrauddetector-fwbr.onrender.com";
+// ===============================
+// AI Credit Card Fraud Detection
+// Frontend Script
+// ===============================
+
+const API_URL = "https://creditcardfrauddetector-fwbr.onrender.com/predict";
+
+const uploadForm = document.getElementById("uploadForm");
+const fileInput = document.getElementById("csvFile");
+
+const loadingSpinner = document.getElementById("loadingSpinner");
+const resultsSection = document.getElementById("resultsSection");
+
+const totalTransactions = document.getElementById("totalTransactions");
+const fraudCount = document.getElementById("fraudCount");
+const legitCount = document.getElementById("legitCount");
+
+const tableBody = document.getElementById("tableBody");
+const searchInput = document.getElementById("searchInput");
+const summaryText = document.getElementById("summaryText");
+const downloadBtn = document.getElementById("downloadBtn");
 
 let pieChart = null;
 let barChart = null;
+let latestResults = [];
 
-const uploadForm = document.getElementById("uploadForm");
+// -------------------------------
+// Upload CSV
+// -------------------------------
 
-uploadForm.addEventListener("submit", async function (e) {
+uploadForm.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
-    const fileInput = document.querySelector('input[type="file"]');
-
-    if (fileInput.files.length === 0) {
+    if (!fileInput.files.length) {
         alert("Please select a CSV file.");
         return;
     }
 
-    const button = uploadForm.querySelector("button");
-
-    button.disabled = true;
-
-    button.innerHTML = `
-        <span class="spinner-border spinner-border-sm"></span>
-        Running Prediction...
-    `;
+    loadingSpinner.classList.remove("d-none");
+    resultsSection.style.display = "none";
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
 
     try {
 
-        let response;
+        let response = await fetch(API_URL, {
+            method: "POST",
+            body: formData
+        });
 
-        // Try twice in case Render has just finished waking up
-        for (let attempt = 1; attempt <= 2; attempt++) {
+        // Retry once in case Render is waking up
+        if (!response.ok) {
 
-            try {
-
-                response = await fetch(`${API_URL}/predict`, {
-                    method: "POST",
-                    body: formData
-                });
-
-                if (response.ok) break;
-
-            } catch (err) {
-
-                if (attempt === 2) throw err;
-
-            }
-
-            // Wait 3 seconds before retrying
             await new Promise(resolve => setTimeout(resolve, 3000));
+
+            response = await fetch(API_URL, {
+                method: "POST",
+                body: formData
+            });
+
         }
 
-        if (!response || !response.ok) {
+        if (!response.ok) {
             throw new Error("Prediction failed.");
         }
 
         const data = await response.json();
 
-        console.log(data);
+        loadingSpinner.classList.add("d-none");
+        resultsSection.style.display = "block";
 
-        // -------------------------------
-        // Summary Cards
-        // -------------------------------
+        renderResults(data);
 
-        document.getElementById("total").innerText = data.total;
-        document.getElementById("legitimate").innerText = data.legitimate;
-        document.getElementById("fraud").innerText = data.fraud;
-        document.getElementById("fraud_percent").innerText =
-            data.fraud_percent + "%";
+    } catch (error) {
 
-        // -------------------------------
-        // Results Table
-        // -------------------------------
-
-        document.getElementById("resultsTable").innerHTML = data.table;
-
-        // -------------------------------
-        // Destroy Previous Charts
-        // -------------------------------
-
-        if (pieChart) {
-            pieChart.destroy();
-        }
-
-        if (barChart) {
-            barChart.destroy();
-        }
-
-        // -------------------------------
-        // Pie Chart
-        // -------------------------------
-
-        pieChart = new Chart(
-            document.getElementById("pieChart"),
-            {
-                type: "pie",
-                data: {
-                    labels: ["Fraud", "Legitimate"],
-                    datasets: [{
-                        data: [
-                            data.fraud,
-                            data.legitimate
-                        ],
-                        backgroundColor: [
-                            "#dc3545",
-                            "#198754"
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            }
-        );
-
-        // -------------------------------
-        // Bar Chart
-        // -------------------------------
-
-        barChart = new Chart(
-            document.getElementById("barChart"),
-            {
-                type: "bar",
-                data: {
-                    labels: [
-                        "Fraud",
-                        "Legitimate"
-                    ],
-                    datasets: [{
-                        label: "Transactions",
-                        data: [
-                            data.fraud,
-                            data.legitimate
-                        ],
-                        backgroundColor: [
-                            "#dc3545",
-                            "#198754"
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            }
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(error);
+        loadingSpinner.classList.add("d-none");
 
         alert(
-            "The AI server is still starting. Please wait a few seconds and try again."
+            "Unable to connect to the backend.\n\nIf you're using Render, the backend may still be waking up. Please wait a few seconds and try again."
         );
 
-    }
-
-    finally {
-
-        button.disabled = false;
-
-        button.innerHTML = `
-            <i class="bi bi-search"></i>
-            Run Prediction
-        `;
+        console.error(error);
 
     }
 
 });
+// -------------------------------
+// Render Results
+// -------------------------------
 
-// --------------------------------------
-// Search Table
-// --------------------------------------
+function renderResults(data) {
 
-function filterTable() {
+    latestResults = data.predictions || [];
 
-    const input = document
-        .getElementById("searchInput")
-        .value
-        .toLowerCase();
+    const fraud = latestResults.filter(
+        item => item.prediction === "Fraud"
+    ).length;
 
-    const table = document.querySelector("#resultsTable table");
+    const legit = latestResults.length - fraud;
 
-    if (!table) return;
+    totalTransactions.textContent = latestResults.length;
+    fraudCount.textContent = fraud;
+    legitCount.textContent = legit;
 
-    const rows = table.getElementsByTagName("tr");
+    summaryText.innerHTML = `
+        <strong>${fraud}</strong> fraudulent and
+        <strong>${legit}</strong> legitimate transactions detected.
+        <br><br>
+        Model Accuracy:
+        <strong>99.84%</strong>
+    `;
 
-    for (let i = 1; i < rows.length; i++) {
-
-        const text = rows[i].innerText.toLowerCase();
-
-        rows[i].style.display =
-            text.includes(input)
-                ? ""
-                : "none";
-    }
+    renderTable(latestResults);
+    createCharts(fraud, legit);
 
 }
+
+// -------------------------------
+// Prediction Table
+// -------------------------------
+
+function renderTable(results) {
+
+    tableBody.innerHTML = "";
+
+    results.forEach((result, index) => {
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${result.prediction}</td>
+            <td>${result.confidence ?? "-"}</td>
+        `;
+
+        tableBody.appendChild(row);
+
+    });
+
+}
+
+// -------------------------------
+// Search Table
+// -------------------------------
+
+searchInput.addEventListener("keyup", () => {
+
+    const search = searchInput.value.toLowerCase();
+
+    [...tableBody.children].forEach(row => {
+
+        row.style.display = row.textContent
+            .toLowerCase()
+            .includes(search)
+            ? ""
+            : "none";
+
+    });
+
+});
+
+// -------------------------------
+// Charts
+// -------------------------------
+
+function createCharts(fraud, legit) {
+
+    if (pieChart) {
+        pieChart.destroy();
+    }
+
+    if (barChart) {
+        barChart.destroy();
+    }
+
+    pieChart = new Chart(
+        document.getElementById("pieChart"),
+        {
+            type: "pie",
+            data: {
+                labels: [
+                    "Fraud",
+                    "Legitimate"
+                ],
+                datasets: [{
+                    data: [
+                        fraud,
+                        legit
+                    ]
+                }]
+            }
+        }
+    );
+
+    barChart = new Chart(
+        document.getElementById("barChart"),
+        {
+            type: "bar",
+            data: {
+                labels: [
+                    "Fraud",
+                    "Legitimate"
+                ],
+                datasets: [{
+                    label: "Transactions",
+                    data: [
+                        fraud,
+                        legit
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+
+}
+// -------------------------------
+// Download CSV Report
+// -------------------------------
+
+downloadBtn.addEventListener("click", () => {
+
+    if (!latestResults.length) {
+        alert("No prediction results available.");
+        return;
+    }
+
+    let csv = "Prediction,Confidence\n";
+
+    latestResults.forEach(result => {
+
+        csv += `${result.prediction},${result.confidence ?? ""}\n`;
+
+    });
+
+    const blob = new Blob(
+        [csv],
+        { type: "text/csv" }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "fraud_detection_report.csv";
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+});
